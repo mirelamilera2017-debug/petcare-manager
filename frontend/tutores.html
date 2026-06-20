@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Tutores | PetCare Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body onload="listar()">
+
+<div class="app">
+
+    <aside class="sidebar">
+        <h2>🐾 PetCare</h2>
+        <a href="dashboard.html">🏠 Dashboard</a>
+        <a href="tutores.html" class="active">👤 Tutores</a>
+        <a href="pets.html">🐶 Pets</a>
+        <a href="produtos.html">🦴 Produtos</a>
+        <a href="servicos.html">✂ Serviços</a>
+        <a href="agendamentos.html">📅 Agendamentos</a>
+        <a href="#" onclick="logout()">🚪 Sair</a>
+    </aside>
+
+    <main class="content">
+
+        <div class="topbar">
+            <h1>Tutores</h1>
+            <span>PetCare Manager</span>
+        </div>
+
+        <div class="card">
+            <form id="formulario" onsubmit="salvar(event)">
+                <input type="hidden" id="id">
+
+                <div class="form-grid">
+                    <div>
+                        <label>Nome</label>
+                        <input type="text" id="nome" placeholder="Nome do tutor">
+                    </div>
+
+                    <div>
+                        <label>Telefone</label>
+                        <input type="text" id="telefone" placeholder="Telefone">
+                    </div>
+
+                    <div>
+                        <label>Endereço</label>
+                        <input type="text" id="endereco" placeholder="Endereço">
+                    </div>
+                </div>
+
+                <button class="btn-primary" type="submit">Salvar Tutor</button>
+            </form>
+        </div>
+
+        <div class="table-box">
+            <input class="search-box" id="pesquisa" onkeyup="pesquisar()" placeholder="Pesquisar tutor...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Endereço</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela"></tbody>
+            </table>
+        </div>
+
+    </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/tutores.js"></script>
+
+</body>
+</html>
