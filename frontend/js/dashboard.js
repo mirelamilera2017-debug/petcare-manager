@@ -6,8 +6,13 @@ async function carregarDashboard() {
     if (usuarioSalvo) {
         const usuario = JSON.parse(usuarioSalvo);
 
-        document.getElementById("usuario").innerHTML =
-            `Bem-vindo(a), <strong>${usuario.nome}</strong>`;
+        const nomeFormatado = usuario.nome
+    .split(" ")
+    .map(nome => nome.charAt(0).toUpperCase() + nome.slice(1))
+    .join(" ");
+
+document.getElementById("usuario").innerHTML =
+    `Bem-vindo(a), <strong>${nomeFormatado}</strong>`;
     }
 
     try {
