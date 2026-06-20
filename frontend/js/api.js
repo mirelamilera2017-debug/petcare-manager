@@ -1,4 +1,4 @@
-const API = "http://localhost:3000";
+const API = "https://petcare-manager.onrender.com";
 
 function getToken() {
     return localStorage.getItem("token");
@@ -16,28 +16,40 @@ function logout() {
 }
 
 async function apiFetch(endpoint, options = {}) {
-    const resposta = await fetch(API + endpoint, {
+
+    const resposta = await fetch(`${API}${endpoint}`, {
+
         ...options,
+
         headers: {
+
             "Content-Type": "application/json",
             "Authorization": "Bearer " + getToken(),
             ...(options.headers || {})
+
         }
+
     });
 
     const dados = await resposta.json();
 
     if (!resposta.ok) {
+
         alert(dados.mensagem || "Erro na requisição");
         throw new Error(dados.mensagem || "Erro");
+
     }
 
     return dados;
 }
 
 function moeda(valor) {
+
     return Number(valor || 0).toLocaleString("pt-BR", {
+
         style: "currency",
         currency: "BRL"
+
     });
+
 }

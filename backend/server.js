@@ -1,19 +1,40 @@
-const agendamentoRoutes = require("./routes/agendamentoRoutes");
-const servicoRoutes = require("./routes/servicoRoutes");
-const produtoRoutes = require("./routes/produtoRoutes");
-const petRoutes = require("./routes/petRoutes");
 const express = require("express");
 const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
+
+const authRoutes = require("./routes/authRoutes");
 const tutorRoutes = require("./routes/tutorRoutes");
+const petRoutes = require("./routes/petRoutes");
+const produtoRoutes = require("./routes/produtoRoutes");
+const servicoRoutes = require("./routes/servicoRoutes");
+const agendamentoRoutes = require("./routes/agendamentoRoutes");
 
 const swaggerDocument = require("./swagger");
-const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
+// CORS liberado para Codespaces e localhost - [Mirela Santos]
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+
+    next();
+});
+
 app.use(cors());
 app.use(express.json());
+
+app.get("/", (req, res) => {
+    res.json({
+        mensagem: "🐾 API PetCare Manager funcionando!",
+        documentacao: "/api-docs"
+    });
+});
 
 app.use("/auth", authRoutes);
 app.use("/tutores", tutorRoutes);
@@ -24,15 +45,8 @@ app.use("/agendamentos", agendamentoRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get("/", (req, res) => {
-    res.json({
-        mensagem: "🐾 API PetCare Manager funcionando!",
-        documentacao: "http://localhost:3000/api-docs"
-    });
-});
+const PORT = process.env.PORT || 3000;
 
-const PORT = 3000;
-
-app.listen(PORT, () => {
-    console.log(`Servidor iniciado em http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor iniciado em http://0.0.0.0:${PORT}`);
 });

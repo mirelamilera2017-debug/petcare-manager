@@ -1,16 +1,18 @@
-const API = "http://localhost:3000";
+const API = "https://petcare-manager.onrender.com";
 
-// ===============================
-// Login do usuário - [Mirela Santos]
-// ===============================
+// =========================
+// Login
+// =========================
 async function loginUsuario() {
 
     const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value.trim();
 
     if (!email || !senha) {
+
         alert("Preencha e-mail e senha.");
         return;
+
     }
 
     try {
@@ -34,15 +36,12 @@ async function loginUsuario() {
 
         if (!resposta.ok) {
 
-            alert(dados.mensagem);
+            alert(dados.mensagem || "Erro ao fazer login.");
             return;
 
         }
 
-        // Salva o token
         localStorage.setItem("token", dados.token);
-
-        // Salva usuário
         localStorage.setItem("usuario", email);
 
         alert("Login realizado com sucesso!");
@@ -53,7 +52,7 @@ async function loginUsuario() {
 
     catch (erro) {
 
-        console.error(erro);
+        console.error("Erro no login:", erro);
 
         alert("Erro ao conectar com a API.");
 
@@ -61,11 +60,9 @@ async function loginUsuario() {
 
 }
 
-
-
-// ===============================
-// Cadastro de usuário
-// ===============================
+// =========================
+// Cadastro
+// =========================
 async function cadastrarUsuario() {
 
     const nome = document.getElementById("nome").value.trim();
@@ -75,7 +72,6 @@ async function cadastrarUsuario() {
     if (!nome || !email || !senha) {
 
         alert("Preencha todos os campos.");
-
         return;
 
     }
@@ -87,32 +83,35 @@ async function cadastrarUsuario() {
             method: "POST",
 
             headers: {
-
                 "Content-Type": "application/json"
-
             },
 
             body: JSON.stringify({
-
                 nome,
                 email,
                 senha
-
             })
 
         });
 
         const dados = await resposta.json();
 
-        alert(dados.mensagem);
+        if (!resposta.ok) {
+
+            alert(dados.mensagem || "Erro ao cadastrar usuário.");
+            return;
+
+        }
+
+        alert(dados.mensagem || "Usuário cadastrado com sucesso!");
 
     }
 
     catch (erro) {
 
-        console.error(erro);
+        console.error("Erro no cadastro:", erro);
 
-        alert("Erro ao cadastrar usuário.");
+        alert("Erro ao conectar com a API.");
 
     }
 
