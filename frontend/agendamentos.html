@@ -5,100 +5,93 @@
     <title>Agendamentos | PetCare Manager</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body onload="listar()">
+<body onload="carregarAgendamentos()">
 
-<div class="app">
+<div class="sidebar">
+    <div class="logo">🐾 PetCare</div>
 
-    <aside class="sidebar">
-        <h2>🐾 PetCare</h2>
-        <a href="dashboard.html">🏠 Dashboard</a>
-        <a href="tutores.html">👤 Tutores</a>
-        <a href="pets.html">🐶 Pets</a>
-        <a href="produtos.html">🦴 Produtos</a>
-        <a href="servicos.html">✂ Serviços</a>
-        <a href="agendamentos.html" class="active">📅 Agendamentos</a>
-        <a href="#" onclick="logout()">🚪 Sair</a>
-    </aside>
-
-    <main class="content">
-
-        <div class="topbar">
-            <h1>Agendamentos</h1>
-            <span>PetCare Manager</span>
-        </div>
-
-        <div class="card">
-            <form id="formulario" onsubmit="salvar(event)">
-                <input type="hidden" id="id">
-
-                <div class="form-grid">
-
-                    <div>
-                        <label>Tutor</label>
-                        <select id="tutorId"></select>
-                    </div>
-
-                    <div>
-                        <label>Pet</label>
-                        <select id="petId"></select>
-                    </div>
-
-                    <div>
-                        <label>Serviço</label>
-                        <select id="servicoId"></select>
-                    </div>
-
-                    <div>
-                        <label>Data</label>
-                        <input type="date" id="data">
-                    </div>
-
-                    <div>
-                        <label>Hora</label>
-                        <input type="time" id="hora">
-                    </div>
-
-                    <div>
-                        <label>Status</label>
-                        <select id="status">
-                            <option>Agendado</option>
-                            <option>Finalizado</option>
-                            <option>Cancelado</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <button class="btn-primary" type="submit">Salvar Agendamento</button>
-            </form>
-        </div>
-
-        <div class="table-box">
-            <input class="search-box" id="pesquisa" onkeyup="pesquisar()" placeholder="Pesquisar agendamento...">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tutor</th>
-                        <th>Pet</th>
-                        <th>Serviço</th>
-                        <th>Data</th>
-                        <th>Hora</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-
-                <tbody id="tabela"></tbody>
-            </table>
-        </div>
-
-    </main>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="tutores.html">👤 Tutores</a>
+    <a href="pets.html">🐶 Pets</a>
+    <a href="produtos.html">🦴 Produtos</a>
+    <a href="servicos.html">✂ Serviços</a>
+    <a class="active" href="agendamentos.html">📅 Agendamentos</a>
+    <a onclick="logout()">🚪 Sair</a>
 </div>
+
+<main class="conteudo">
+    <div class="topo-dashboard">
+        <div>
+            <h1>Agendamentos</h1>
+            <p>Controle de atendimentos do PetShop</p>
+        </div>
+        <div class="badge-sistema">PetCare Manager</div>
+    </div>
+
+    <section class="boas-vindas">
+        <input type="hidden" id="idAgendamento">
+
+        <div class="form-grid">
+            <div>
+                <label>Tutor</label>
+                <select id="tutorId"></select>
+            </div>
+
+            <div>
+                <label>Pet</label>
+                <select id="petId"></select>
+            </div>
+
+            <div>
+                <label>Serviço</label>
+                <select id="servicoId"></select>
+            </div>
+
+            <div>
+                <label>Data</label>
+                <input type="date" id="data">
+            </div>
+
+            <div>
+                <label>Hora</label>
+                <input type="time" id="hora">
+            </div>
+
+            <div>
+                <label>Status</label>
+                <select id="status">
+                    <option value="Agendado">Agendado</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-salvar" onclick="salvarAgendamento()">Salvar Agendamento</button>
+    </section>
+
+    <section class="boas-vindas">
+        <input type="text" id="pesquisa" placeholder="Pesquisar agendamento..." oninput="filtrarAgendamentos()">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tutor</th>
+                    <th>Pet</th>
+                    <th>Serviço</th>
+                    <th>Data</th>
+                    <th>Hora</th>
+                    <th>Status</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaAgendamentos"></tbody>
+        </table>
+    </section>
+</main>
 
 <script src="js/api.js"></script>
 <script src="js/agendamentos.js"></script>
-
 </body>
 </html>

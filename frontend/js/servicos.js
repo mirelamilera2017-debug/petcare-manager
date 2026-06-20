@@ -1,82 +1,117 @@
-const endpoint = "/servicos";
-let listaAtual = [];
+let servicos = [];
 
-async function listar() {
+async function carregarServicos() {
     protegerPagina();
-    listaAtual = await apiFetch(endpoint);
-    renderizar(listaAtual);
+
+    try {
+        servicos = await apiFetch("/servicos");
+        exibirServicos(servicos);
+    } catch (erro) {
+        console.error("Erro ao carregar serviços:", erro);
+    }
 }
 
-function renderizar(lista) {
-    const tabela = document.getElementById("tabela");
+function exibirServicos(lista) {
+    const tabela = document.getElementById("listaServicos");
     tabela.innerHTML = "";
 
-    lista.forEach(item => {
+    lista.forEach(servico => {
         tabela.innerHTML += `
             <tr>
-                <td>${item.nome}</td>
-                <td>${item.descricao}</td>
-                <td>${moeda(item.preco)}</td>
+                <td>${servico.nome}</td>
+                <td>${servico.descricao}</td>
+                <td>${moeda(servico.preco)}</td>
                 <td>
-                    <button class="btn-small btn-edit" onclick='editar(${JSON.stringify(item)})'>Editar</button>
-                    <button class="btn-small btn-delete" onclick="excluir(${item.id})">Excluir</button>
+                    <button class="btn-editar" onclick="editarServico(${servico.id})">Editar</button>
+                    <button class="btn-excluir" onclick="excluirServico(${servico.id})">Excluir</button>
                 </td>
             </tr>
         `;
     });
 }
 
-async function salvar(event) {
-    event.preventDefault();
+async function salvarServico() {
+    const id = document.getElementById("idServico").value;
+    const nome = document.getElementById("nome").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const preco = document.getElementById("preco").value;
 
-    const id = document.getElementById("id").value;
-
-    const dados = {
-        nome: document.getElementById("nome").value,
-        descricao: document.getElementById("descricao").value,
-        preco: document.getElementById("preco").value
-    };
-
-    if (id) {
-        await apiFetch(`${endpoint}/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados)
-        });
-    } else {
-        await apiFetch(endpoint, {
-            method: "POST",
-            body: JSON.stringify(dados)
-        });
+    if (!nome || !descricao || !preco) {
+        alert("Preencha todos os campos.");
+        return;
     }
 
-    document.getElementById("formulario").reset();
-    document.getElementById("id").value = "";
-    listar();
+    const servico = {
+        nome,
+        descricao,
+        preco: Number(preco)
+    };
+
+    try {
+        if (id) {
+            await apiFetch(`/servicos/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(servico)
+            });
+            alert("Serviço atualizado com sucesso!");
+        } else {
+            await apiFetch("/servicos", {
+                method: "POST",
+                body: JSON.stringify(servico)
+            });
+            alert("Serviço cadastrado com sucesso!");
+        }
+
+        limparFormulario();
+        carregarServicos();
+
+    } catch (erro) {
+        console.error("Erro ao salvar serviço:", erro);
+    }
 }
 
-function editar(item) {
-    document.getElementById("id").value = item.id;
-    document.getElementById("nome").value = item.nome;
-    document.getElementById("descricao").value = item.descricao;
-    document.getElementById("preco").value = item.preco;
+function editarServico(id) {
+    const servico = servicos.find(s => s.id == id);
+
+    if (!servico) return;
+
+    document.getElementById("idServico").value = servico.id;
+    document.getElementById("nome").value = servico.nome;
+    document.getElementById("descricao").value = servico.descricao;
+    document.getElementById("preco").value = servico.preco;
 }
 
-async function excluir(id) {
-    if (confirm("Deseja realmente excluir este serviço?")) {
-        await apiFetch(`${endpoint}/${id}`, {
+async function excluirServico(id) {
+    if (!confirm("Deseja excluir este serviço?")) return;
+
+    try {
+        await apiFetch(`/servicos/${id}`, {
             method: "DELETE"
         });
 
-        listar();
+        alert("Serviço excluído com sucesso!");
+        carregarServicos();
+
+    } catch (erro) {
+        console.error("Erro ao excluir serviço:", erro);
     }
 }
 
-function pesquisar() {
+function filtrarServicos() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
 
-    const filtrados = listaAtual.filter(item =>
-        JSON.stringify(item).toLowerCase().includes(termo)
+    const filtrados = servicos.filter(servico =>
+        servico.nome.toLowerCase().includes(termo) ||
+        servico.descricao.toLowerCase().includes(termo) ||
+        String(servico.preco).includes(termo)
     );
 
-    renderizar(filtrados);
+    exibirServicos(filtrados);
+}
+
+function limparFormulario() {
+    document.getElementById("idServico").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
 }

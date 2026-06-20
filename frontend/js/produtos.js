@@ -1,85 +1,123 @@
-const endpoint = "/produtos";
-let listaAtual = [];
+let produtos = [];
 
-async function listar() {
+async function carregarProdutos() {
     protegerPagina();
-    listaAtual = await apiFetch(endpoint);
-    renderizar(listaAtual);
+
+    try {
+        produtos = await apiFetch("/produtos");
+        exibirProdutos(produtos);
+    } catch (erro) {
+        console.error("Erro ao carregar produtos:", erro);
+    }
 }
 
-function renderizar(lista) {
-    const tabela = document.getElementById("tabela");
+function exibirProdutos(lista) {
+    const tabela = document.getElementById("listaProdutos");
     tabela.innerHTML = "";
 
-    lista.forEach(item => {
+    lista.forEach(produto => {
         tabela.innerHTML += `
             <tr>
-                <td>${item.nome}</td>
-                <td>${item.descricao}</td>
-                <td>${moeda(item.preco)}</td>
-                <td>${item.estoque}</td>
+                <td>${produto.nome}</td>
+                <td>${produto.descricao}</td>
+                <td>${moeda(produto.preco)}</td>
+                <td>${produto.estoque}</td>
                 <td>
-                    <button class="btn-small btn-edit" onclick='editar(${JSON.stringify(item)})'>Editar</button>
-                    <button class="btn-small btn-delete" onclick="excluir(${item.id})">Excluir</button>
+                    <button class="btn-editar" onclick="editarProduto(${produto.id})">Editar</button>
+                    <button class="btn-excluir" onclick="excluirProduto(${produto.id})">Excluir</button>
                 </td>
             </tr>
         `;
     });
 }
 
-async function salvar(event) {
-    event.preventDefault();
+async function salvarProduto() {
+    const id = document.getElementById("idProduto").value;
+    const nome = document.getElementById("nome").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const preco = document.getElementById("preco").value;
+    const estoque = document.getElementById("estoque").value;
 
-    const id = document.getElementById("id").value;
-
-    const dados = {
-        nome: document.getElementById("nome").value,
-        descricao: document.getElementById("descricao").value,
-        preco: document.getElementById("preco").value,
-        estoque: document.getElementById("estoque").value
-    };
-
-    if (id) {
-        await apiFetch(`${endpoint}/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados)
-        });
-    } else {
-        await apiFetch(endpoint, {
-            method: "POST",
-            body: JSON.stringify(dados)
-        });
+    if (!nome || !descricao || !preco || !estoque) {
+        alert("Preencha todos os campos.");
+        return;
     }
 
-    document.getElementById("formulario").reset();
-    document.getElementById("id").value = "";
-    listar();
+    const produto = {
+        nome,
+        descricao,
+        preco: Number(preco),
+        estoque: Number(estoque)
+    };
+
+    try {
+        if (id) {
+            await apiFetch(`/produtos/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(produto)
+            });
+            alert("Produto atualizado com sucesso!");
+        } else {
+            await apiFetch("/produtos", {
+                method: "POST",
+                body: JSON.stringify(produto)
+            });
+            alert("Produto cadastrado com sucesso!");
+        }
+
+        limparFormulario();
+        carregarProdutos();
+
+    } catch (erro) {
+        console.error("Erro ao salvar produto:", erro);
+    }
 }
 
-function editar(item) {
-    document.getElementById("id").value = item.id;
-    document.getElementById("nome").value = item.nome;
-    document.getElementById("descricao").value = item.descricao;
-    document.getElementById("preco").value = item.preco;
-    document.getElementById("estoque").value = item.estoque;
+function editarProduto(id) {
+    const produto = produtos.find(p => p.id == id);
+
+    if (!produto) return;
+
+    document.getElementById("idProduto").value = produto.id;
+    document.getElementById("nome").value = produto.nome;
+    document.getElementById("descricao").value = produto.descricao;
+    document.getElementById("preco").value = produto.preco;
+    document.getElementById("estoque").value = produto.estoque;
 }
 
-async function excluir(id) {
-    if (confirm("Deseja realmente excluir este produto?")) {
-        await apiFetch(`${endpoint}/${id}`, {
+async function excluirProduto(id) {
+    if (!confirm("Deseja excluir este produto?")) return;
+
+    try {
+        await apiFetch(`/produtos/${id}`, {
             method: "DELETE"
         });
 
-        listar();
+        alert("Produto excluído com sucesso!");
+        carregarProdutos();
+
+    } catch (erro) {
+        console.error("Erro ao excluir produto:", erro);
     }
 }
 
-function pesquisar() {
+function filtrarProdutos() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
 
-    const filtrados = listaAtual.filter(item =>
-        JSON.stringify(item).toLowerCase().includes(termo)
+    const filtrados = produtos.filter(produto =>
+        produto.nome.toLowerCase().includes(termo) ||
+        produto.descricao.toLowerCase().includes(termo) ||
+        String(produto.preco).includes(termo) ||
+        String(produto.estoque).includes(termo)
     );
 
-    renderizar(filtrados);
+    exibirProdutos(filtrados);
+}
+
+function limparFormulario() {
+    document.getElementById("idProduto").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+    document.getElementById("estoque").value = "";
 }

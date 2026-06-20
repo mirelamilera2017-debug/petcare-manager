@@ -1,84 +1,113 @@
-const endpoint = "/tutores";
-let listaAtual = [];
+let tutores = [];
 
-async function listar() {
+async function carregarTutores() {
     protegerPagina();
 
-    listaAtual = await apiFetch(endpoint);
-    renderizar(listaAtual);
+    try {
+        tutores = await apiFetch("/tutores");
+        exibirTutores(tutores);
+    } catch (erro) {
+        console.error("Erro ao carregar tutores:", erro);
+    }
 }
 
-function renderizar(lista) {
-    const tabela = document.getElementById("tabela");
+function exibirTutores(lista) {
+    const tabela = document.getElementById("listaTutores");
     tabela.innerHTML = "";
 
-    lista.forEach(item => {
+    lista.forEach(tutor => {
         tabela.innerHTML += `
             <tr>
-                <td>${item.nome}</td>
-                <td>${item.telefone}</td>
-                <td>${item.endereco}</td>
+                <td>${tutor.nome}</td>
+                <td>${tutor.telefone || tutor.contato || ""}</td>
+                <td>${tutor.endereco || ""}</td>
                 <td>
-                    <button class="btn-small btn-edit" onclick='editar(${JSON.stringify(item)})'>Editar</button>
-                    <button class="btn-small btn-delete" onclick="excluir(${item.id})">Excluir</button>
+                    <button class="btn-editar" onclick="editarTutor(${tutor.id})">Editar</button>
+                    <button class="btn-excluir" onclick="excluirTutor(${tutor.id})">Excluir</button>
                 </td>
             </tr>
         `;
     });
 }
 
-async function salvar(event) {
-    event.preventDefault();
+async function salvarTutor() {
+    const id = document.getElementById("idTutor").value;
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const endereco = document.getElementById("endereco").value.trim();
 
-    const id = document.getElementById("id").value;
-
-    const dados = {
-        nome: document.getElementById("nome").value,
-        telefone: document.getElementById("telefone").value,
-        endereco: document.getElementById("endereco").value
-    };
-
-    if (id) {
-        await apiFetch(`${endpoint}/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados)
-        });
-    } else {
-        await apiFetch(endpoint, {
-            method: "POST",
-            body: JSON.stringify(dados)
-        });
+    if (!nome || !telefone || !endereco) {
+        alert("Preencha todos os campos.");
+        return;
     }
 
-    document.getElementById("formulario").reset();
-    document.getElementById("id").value = "";
+    const tutor = { nome, telefone, endereco };
 
-    listar();
+    try {
+        if (id) {
+            await apiFetch(`/tutores/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(tutor)
+            });
+            alert("Tutor atualizado com sucesso!");
+        } else {
+            await apiFetch("/tutores", {
+                method: "POST",
+                body: JSON.stringify(tutor)
+            });
+            alert("Tutor cadastrado com sucesso!");
+        }
+
+        limparFormulario();
+        carregarTutores();
+
+    } catch (erro) {
+        console.error("Erro ao salvar tutor:", erro);
+    }
 }
 
-function editar(item) {
-    document.getElementById("id").value = item.id;
-    document.getElementById("nome").value = item.nome;
-    document.getElementById("telefone").value = item.telefone;
-    document.getElementById("endereco").value = item.endereco;
+function editarTutor(id) {
+    const tutor = tutores.find(t => t.id == id);
+
+    if (!tutor) return;
+
+    document.getElementById("idTutor").value = tutor.id;
+    document.getElementById("nome").value = tutor.nome;
+    document.getElementById("telefone").value = tutor.telefone || tutor.contato || "";
+    document.getElementById("endereco").value = tutor.endereco || "";
 }
 
-async function excluir(id) {
-    if (confirm("Deseja realmente excluir este tutor?")) {
-        await apiFetch(`${endpoint}/${id}`, {
+async function excluirTutor(id) {
+    if (!confirm("Deseja excluir este tutor?")) return;
+
+    try {
+        await apiFetch(`/tutores/${id}`, {
             method: "DELETE"
         });
 
-        listar();
+        alert("Tutor excluído com sucesso!");
+        carregarTutores();
+
+    } catch (erro) {
+        console.error("Erro ao excluir tutor:", erro);
     }
 }
 
-function pesquisar() {
+function filtrarTutores() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
 
-    const filtrados = listaAtual.filter(item =>
-        JSON.stringify(item).toLowerCase().includes(termo)
+    const filtrados = tutores.filter(tutor =>
+        tutor.nome.toLowerCase().includes(termo) ||
+        String(tutor.telefone || "").toLowerCase().includes(termo) ||
+        String(tutor.endereco || "").toLowerCase().includes(termo)
     );
 
-    renderizar(filtrados);
+    exibirTutores(filtrados);
+}
+
+function limparFormulario() {
+    document.getElementById("idTutor").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("telefone").value = "";
+    document.getElementById("endereco").value = "";
 }

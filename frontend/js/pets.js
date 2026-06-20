@@ -1,103 +1,150 @@
-const endpoint = "/pets";
-let listaAtual = [];
+let pets = [];
+let tutores = [];
 
-async function listar() {
+async function carregarPets() {
     protegerPagina();
 
-    await carregarTutores();
+    try {
+        tutores = await apiFetch("/tutores");
+        pets = await apiFetch("/pets");
 
-    listaAtual = await apiFetch(endpoint);
-    renderizar(listaAtual);
+        carregarSelectTutores();
+        exibirPets(pets);
+
+    } catch (erro) {
+        console.error("Erro ao carregar pets:", erro);
+    }
 }
 
-async function carregarTutores() {
-    const tutores = await apiFetch("/tutores");
-
+function carregarSelectTutores() {
     const select = document.getElementById("tutorId");
-    select.innerHTML = '<option value="">Selecione</option>';
+    select.innerHTML = `<option value="">Selecione</option>`;
 
     tutores.forEach(tutor => {
-        select.innerHTML += `<option value="${tutor.id}">${tutor.nome}</option>`;
+        select.innerHTML += `
+            <option value="${tutor.id}">${tutor.nome}</option>
+        `;
     });
 }
 
-function renderizar(lista) {
-    const tabela = document.getElementById("tabela");
+function buscarNomeTutor(tutorId) {
+    const tutor = tutores.find(t => t.id == tutorId);
+    return tutor ? tutor.nome : "Não informado";
+}
+
+function exibirPets(lista) {
+    const tabela = document.getElementById("listaPets");
     tabela.innerHTML = "";
 
-    lista.forEach(item => {
+    lista.forEach(pet => {
         tabela.innerHTML += `
             <tr>
-                <td>${item.nome}</td>
-                <td>${item.especie}</td>
-                <td>${item.raca}</td>
-                <td>${item.sexo}</td>
-                <td>${item.tutorNome}</td>
+                <td>${pet.nome}</td>
+                <td>${pet.especie}</td>
+                <td>${pet.raca}</td>
+                <td>${pet.sexo}</td>
+                <td>${buscarNomeTutor(pet.tutorId)}</td>
                 <td>
-                    <button class="btn-small btn-edit" onclick='editar(${JSON.stringify(item)})'>Editar</button>
-                    <button class="btn-small btn-delete" onclick="excluir(${item.id})">Excluir</button>
+                    <button class="btn-editar" onclick="editarPet(${pet.id})">Editar</button>
+                    <button class="btn-excluir" onclick="excluirPet(${pet.id})">Excluir</button>
                 </td>
             </tr>
         `;
     });
 }
 
-async function salvar(event) {
-    event.preventDefault();
+async function salvarPet() {
+    const id = document.getElementById("idPet").value;
+    const nome = document.getElementById("nome").value.trim();
+    const especie = document.getElementById("especie").value.trim();
+    const raca = document.getElementById("raca").value.trim();
+    const sexo = document.getElementById("sexo").value;
+    const tutorId = document.getElementById("tutorId").value;
 
-    const id = document.getElementById("id").value;
-
-    const dados = {
-        nome: document.getElementById("nome").value,
-        especie: document.getElementById("especie").value,
-        raca: document.getElementById("raca").value,
-        sexo: document.getElementById("sexo").value,
-        tutorId: document.getElementById("tutorId").value
-    };
-
-    if (id) {
-        await apiFetch(`${endpoint}/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados)
-        });
-    } else {
-        await apiFetch(endpoint, {
-            method: "POST",
-            body: JSON.stringify(dados)
-        });
+    if (!nome || !especie || !raca || !sexo || !tutorId) {
+        alert("Preencha todos os campos.");
+        return;
     }
 
-    document.getElementById("formulario").reset();
-    document.getElementById("id").value = "";
+    const pet = {
+        nome,
+        especie,
+        raca,
+        sexo,
+        tutorId: Number(tutorId)
+    };
 
-    listar();
+    try {
+        if (id) {
+            await apiFetch(`/pets/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(pet)
+            });
+            alert("Pet atualizado com sucesso!");
+        } else {
+            await apiFetch("/pets", {
+                method: "POST",
+                body: JSON.stringify(pet)
+            });
+            alert("Pet cadastrado com sucesso!");
+        }
+
+        limparFormulario();
+        carregarPets();
+
+    } catch (erro) {
+        console.error("Erro ao salvar pet:", erro);
+    }
 }
 
-function editar(item) {
-    document.getElementById("id").value = item.id;
-    document.getElementById("nome").value = item.nome;
-    document.getElementById("especie").value = item.especie;
-    document.getElementById("raca").value = item.raca;
-    document.getElementById("sexo").value = item.sexo;
-    document.getElementById("tutorId").value = item.tutorId;
+function editarPet(id) {
+    const pet = pets.find(p => p.id == id);
+
+    if (!pet) return;
+
+    document.getElementById("idPet").value = pet.id;
+    document.getElementById("nome").value = pet.nome;
+    document.getElementById("especie").value = pet.especie;
+    document.getElementById("raca").value = pet.raca;
+    document.getElementById("sexo").value = pet.sexo;
+    document.getElementById("tutorId").value = pet.tutorId;
 }
 
-async function excluir(id) {
-    if (confirm("Deseja realmente excluir este pet?")) {
-        await apiFetch(`${endpoint}/${id}`, {
+async function excluirPet(id) {
+    if (!confirm("Deseja excluir este pet?")) return;
+
+    try {
+        await apiFetch(`/pets/${id}`, {
             method: "DELETE"
         });
 
-        listar();
+        alert("Pet excluído com sucesso!");
+        carregarPets();
+
+    } catch (erro) {
+        console.error("Erro ao excluir pet:", erro);
     }
 }
 
-function pesquisar() {
+function filtrarPets() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
 
-    const filtrados = listaAtual.filter(item =>
-        JSON.stringify(item).toLowerCase().includes(termo)
+    const filtrados = pets.filter(pet =>
+        pet.nome.toLowerCase().includes(termo) ||
+        pet.especie.toLowerCase().includes(termo) ||
+        pet.raca.toLowerCase().includes(termo) ||
+        pet.sexo.toLowerCase().includes(termo) ||
+        buscarNomeTutor(pet.tutorId).toLowerCase().includes(termo)
     );
 
-    renderizar(filtrados);
+    exibirPets(filtrados);
+}
+
+function limparFormulario() {
+    document.getElementById("idPet").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("especie").value = "";
+    document.getElementById("raca").value = "";
+    document.getElementById("sexo").value = "";
+    document.getElementById("tutorId").value = "";
 }

@@ -5,90 +5,88 @@
     <title>Pets | PetCare Manager</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body onload="listar()">
+<body onload="carregarPets()">
 
-<div class="app">
+<div class="sidebar">
+    <div class="logo">🐾 PetCare</div>
 
-    <aside class="sidebar">
-        <h2>🐾 PetCare</h2>
-        <a href="dashboard.html">🏠 Dashboard</a>
-        <a href="tutores.html">👤 Tutores</a>
-        <a href="pets.html" class="active">🐶 Pets</a>
-        <a href="produtos.html">🦴 Produtos</a>
-        <a href="servicos.html">✂ Serviços</a>
-        <a href="agendamentos.html">📅 Agendamentos</a>
-        <a href="#" onclick="logout()">🚪 Sair</a>
-    </aside>
-
-    <main class="content">
-
-        <div class="topbar">
-            <h1>Pets</h1>
-            <span>PetCare Manager</span>
-        </div>
-
-        <div class="card">
-            <form id="formulario" onsubmit="salvar(event)">
-                <input type="hidden" id="id">
-
-                <div class="form-grid">
-                    <div>
-                        <label>Nome</label>
-                        <input type="text" id="nome" placeholder="Nome do pet">
-                    </div>
-
-                    <div>
-                        <label>Espécie</label>
-                        <input type="text" id="especie" placeholder="Cachorro, gato...">
-                    </div>
-
-                    <div>
-                        <label>Raça</label>
-                        <input type="text" id="raca" placeholder="Raça">
-                    </div>
-
-                    <div>
-                        <label>Sexo</label>
-                        <select id="sexo">
-                            <option value="">Selecione</option>
-                            <option>Macho</option>
-                            <option>Fêmea</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Tutor</label>
-                        <select id="tutorId"></select>
-                    </div>
-                </div>
-
-                <button class="btn-primary" type="submit">Salvar Pet</button>
-            </form>
-        </div>
-
-        <div class="table-box">
-            <input class="search-box" id="pesquisa" onkeyup="pesquisar()" placeholder="Pesquisar pet...">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Espécie</th>
-                        <th>Raça</th>
-                        <th>Sexo</th>
-                        <th>Tutor</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela"></tbody>
-            </table>
-        </div>
-
-    </main>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="tutores.html">👤 Tutores</a>
+    <a class="active" href="pets.html">🐶 Pets</a>
+    <a href="produtos.html">🦴 Produtos</a>
+    <a href="servicos.html">✂ Serviços</a>
+    <a href="agendamentos.html">📅 Agendamentos</a>
+    <a onclick="logout()">🚪 Sair</a>
 </div>
+
+<main class="conteudo">
+    <div class="topo-dashboard">
+        <div>
+            <h1>Pets</h1>
+            <p>Gerenciamento de pets cadastrados</p>
+        </div>
+        <div class="badge-sistema">PetCare Manager</div>
+    </div>
+
+    <section class="boas-vindas">
+        <input type="hidden" id="idPet">
+
+        <div class="form-grid">
+            <div>
+                <label>Nome</label>
+                <input type="text" id="nome" placeholder="Nome do pet">
+            </div>
+
+            <div>
+                <label>Espécie</label>
+                <input type="text" id="especie" placeholder="Cachorro, gato...">
+            </div>
+
+            <div>
+                <label>Raça</label>
+                <input type="text" id="raca" placeholder="Raça">
+            </div>
+
+            <div>
+                <label>Sexo</label>
+                <select id="sexo">
+                    <option value="">Selecione</option>
+                    <option value="Macho">Macho</option>
+                    <option value="Fêmea">Fêmea</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Tutor</label>
+                <select id="tutorId">
+                    <option value="">Selecione</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-salvar" onclick="salvarPet()">Salvar Pet</button>
+    </section>
+
+    <section class="boas-vindas">
+        <input type="text" id="pesquisa" placeholder="Pesquisar pet..." oninput="filtrarPets()">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Espécie</th>
+                    <th>Raça</th>
+                    <th>Sexo</th>
+                    <th>Tutor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaPets"></tbody>
+        </table>
+    </section>
+</main>
 
 <script src="js/api.js"></script>
 <script src="js/pets.js"></script>
-
 </body>
 </html>

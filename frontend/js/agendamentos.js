@@ -1,154 +1,189 @@
-let listaAtual = [];
+let agendamentos = [];
+let tutores = [];
+let pets = [];
+let servicos = [];
 
-async function listar() {
+async function carregarAgendamentos() {
     protegerPagina();
 
-    await carregarSelects();
+    try {
+        tutores = await apiFetch("/tutores");
+        pets = await apiFetch("/pets");
+        servicos = await apiFetch("/servicos");
+        agendamentos = await apiFetch("/agendamentos");
 
-    listaAtual = await apiFetch("/agendamentos");
+        carregarSelects();
+        exibirAgendamentos(agendamentos);
 
-    renderizar(listaAtual);
+    } catch (erro) {
+        console.error("Erro ao carregar agendamentos:", erro);
+    }
 }
 
-async function carregarSelects() {
-    const tutores = await apiFetch("/tutores");
-    const pets = await apiFetch("/pets");
-    const servicos = await apiFetch("/servicos");
+function carregarSelects() {
+    const selectTutor = document.getElementById("tutorId");
+    const selectPet = document.getElementById("petId");
+    const selectServico = document.getElementById("servicoId");
 
-    preencherSelect("tutorId", tutores, "nome");
-    preencherSelect("petId", pets, "nome");
-    preencherSelect("servicoId", servicos, "nome");
-}
+    selectTutor.innerHTML = `<option value="">Selecione</option>`;
+    selectPet.innerHTML = `<option value="">Selecione</option>`;
+    selectServico.innerHTML = `<option value="">Selecione</option>`;
 
-function preencherSelect(id, dados, campo) {
-    const select = document.getElementById(id);
+    tutores.forEach(tutor => {
+        selectTutor.innerHTML += `<option value="${tutor.id}">${tutor.nome}</option>`;
+    });
 
-    select.innerHTML = '<option value="">Selecione</option>';
+    pets.forEach(pet => {
+        selectPet.innerHTML += `<option value="${pet.id}">${pet.nome}</option>`;
+    });
 
-    dados.forEach(item => {
-        select.innerHTML += `
-            <option value="${item.id}">
-                ${item[campo]}
-            </option>
-        `;
+    servicos.forEach(servico => {
+        selectServico.innerHTML += `<option value="${servico.id}">${servico.nome} - ${moeda(servico.preco)}</option>`;
     });
 }
 
-function renderizar(lista) {
-    const tabela = document.getElementById("tabela");
+function nomeTutor(id) {
+    const tutor = tutores.find(t => t.id == id);
+    return tutor ? tutor.nome : "Não informado";
+}
 
+function nomePet(id) {
+    const pet = pets.find(p => p.id == id);
+    return pet ? pet.nome : "Não informado";
+}
+
+function nomeServico(id) {
+    const servico = servicos.find(s => s.id == id);
+    return servico ? servico.nome : "Não informado";
+}
+
+function valorServico(id) {
+    const servico = servicos.find(s => s.id == id);
+    return servico ? servico.preco : 0;
+}
+
+function exibirAgendamentos(lista) {
+    const tabela = document.getElementById("listaAgendamentos");
     tabela.innerHTML = "";
 
-    lista.forEach(item => {
+    lista.forEach(agendamento => {
         tabela.innerHTML += `
             <tr>
-                <td>${item.tutorNome}</td>
-                <td>${item.petNome}</td>
-                <td>${item.servicoNome}</td>
-                <td>${item.data}</td>
-                <td>${item.hora}</td>
-                <td>${moeda(item.valorTotal)}</td>
+                <td>${agendamento.tutorNome || nomeTutor(agendamento.tutorId)}</td>
+                <td>${agendamento.petNome || nomePet(agendamento.petId)}</td>
+                <td>${agendamento.servicoNome || nomeServico(agendamento.servicoId)}</td>
+                <td>${agendamento.data}</td>
+                <td>${agendamento.hora}</td>
+                <td>${agendamento.status}</td>
+                <td>${moeda(agendamento.valorTotal || valorServico(agendamento.servicoId))}</td>
                 <td>
-                    <span class="badge badge-${item.status}">
-                        ${item.status}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn-small btn-edit" onclick='editar(${JSON.stringify(item)})'>
-                        Editar
-                    </button>
-
-                    <button class="btn-small btn-success" onclick="finalizar(${item.id})">
-                        Finalizar
-                    </button>
-
-                    <button class="btn-small btn-warning" onclick="cancelar(${item.id})">
-                        Cancelar
-                    </button>
-
-                    <button class="btn-small btn-delete" onclick="excluir(${item.id})">
-                        Excluir
-                    </button>
+                    <button class="btn-editar" onclick="editarAgendamento(${agendamento.id})">Editar</button>
+                    <button class="btn-excluir" onclick="excluirAgendamento(${agendamento.id})">Excluir</button>
                 </td>
             </tr>
         `;
     });
 }
 
-async function salvar(event) {
-    event.preventDefault();
+async function salvarAgendamento() {
+    const id = document.getElementById("idAgendamento").value;
+    const tutorId = document.getElementById("tutorId").value;
+    const petId = document.getElementById("petId").value;
+    const servicoId = document.getElementById("servicoId").value;
+    const data = document.getElementById("data").value;
+    const hora = document.getElementById("hora").value;
+    const status = document.getElementById("status").value;
 
-    const id = document.getElementById("id").value;
-
-    const dados = {
-        tutorId: document.getElementById("tutorId").value,
-        petId: document.getElementById("petId").value,
-        servicoId: document.getElementById("servicoId").value,
-        data: document.getElementById("data").value,
-        hora: document.getElementById("hora").value,
-        status: document.getElementById("status").value
-    };
-
-    if (id) {
-        await apiFetch(`/agendamentos/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados)
-        });
-    } else {
-        await apiFetch("/agendamentos", {
-            method: "POST",
-            body: JSON.stringify(dados)
-        });
+    if (!tutorId || !petId || !servicoId || !data || !hora || !status) {
+        alert("Preencha todos os campos.");
+        return;
     }
 
-    document.getElementById("formulario").reset();
-    document.getElementById("id").value = "";
+    const agendamento = {
+        tutorId: Number(tutorId),
+        petId: Number(petId),
+        servicoId: Number(servicoId),
+        data,
+        hora,
+        status
+    };
 
-    listar();
+    try {
+        if (id) {
+            await apiFetch(`/agendamentos/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(agendamento)
+            });
+
+            alert("Agendamento atualizado com sucesso!");
+        } else {
+            await apiFetch("/agendamentos", {
+                method: "POST",
+                body: JSON.stringify(agendamento)
+            });
+
+            alert("Agendamento cadastrado com sucesso!");
+        }
+
+        limparFormulario();
+        carregarAgendamentos();
+
+    } catch (erro) {
+        console.error("Erro ao salvar agendamento:", erro);
+    }
 }
 
-function editar(item) {
-    document.getElementById("id").value = item.id;
-    document.getElementById("tutorId").value = item.tutorId;
-    document.getElementById("petId").value = item.petId;
-    document.getElementById("servicoId").value = item.servicoId;
-    document.getElementById("data").value = item.data;
-    document.getElementById("hora").value = item.hora;
-    document.getElementById("status").value = item.status;
+function editarAgendamento(id) {
+    const agendamento = agendamentos.find(a => a.id == id);
+
+    if (!agendamento) return;
+
+    document.getElementById("idAgendamento").value = agendamento.id;
+    document.getElementById("tutorId").value = agendamento.tutorId;
+    document.getElementById("petId").value = agendamento.petId;
+    document.getElementById("servicoId").value = agendamento.servicoId;
+    document.getElementById("data").value = agendamento.data;
+    document.getElementById("hora").value = agendamento.hora;
+    document.getElementById("status").value = agendamento.status;
 }
 
-async function cancelar(id) {
-    await apiFetch(`/agendamentos/${id}/cancelar`, {
-        method: "PATCH"
-    });
+async function excluirAgendamento(id) {
+    if (!confirm("Deseja excluir este agendamento?")) return;
 
-    listar();
-}
-
-async function finalizar(id) {
-    await apiFetch(`/agendamentos/${id}/finalizar`, {
-        method: "PATCH"
-    });
-
-    listar();
-}
-
-async function excluir(id) {
-    if (confirm("Deseja realmente excluir este agendamento?")) {
+    try {
         await apiFetch(`/agendamentos/${id}`, {
             method: "DELETE"
         });
 
-        listar();
+        alert("Agendamento excluído com sucesso!");
+        carregarAgendamentos();
+
+    } catch (erro) {
+        console.error("Erro ao excluir agendamento:", erro);
     }
 }
 
-function pesquisar() {
+function filtrarAgendamentos() {
     const termo = document.getElementById("pesquisa").value.toLowerCase();
 
-    const filtrados = listaAtual.filter(item =>
-        JSON.stringify(item).toLowerCase().includes(termo)
+    const filtrados = agendamentos.filter(agendamento =>
+        String(agendamento.data).toLowerCase().includes(termo) ||
+        String(agendamento.hora).toLowerCase().includes(termo) ||
+        String(agendamento.status).toLowerCase().includes(termo) ||
+        nomeTutor(agendamento.tutorId).toLowerCase().includes(termo) ||
+        nomePet(agendamento.petId).toLowerCase().includes(termo) ||
+        nomeServico(agendamento.servicoId).toLowerCase().includes(termo)
     );
 
-    renderizar(filtrados);
+    exibirAgendamentos(filtrados);
+}
+
+function limparFormulario() {
+    document.getElementById("idAgendamento").value = "";
+    document.getElementById("tutorId").value = "";
+    document.getElementById("petId").value = "";
+    document.getElementById("servicoId").value = "";
+    document.getElementById("data").value = "";
+    document.getElementById("hora").value = "";
+    document.getElementById("status").value = "Agendado";
 }

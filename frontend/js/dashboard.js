@@ -7,12 +7,12 @@ async function carregarDashboard() {
         const usuario = JSON.parse(usuarioSalvo);
 
         const nomeFormatado = usuario.nome
-    .split(" ")
-    .map(nome => nome.charAt(0).toUpperCase() + nome.slice(1))
-    .join(" ");
+            .split(" ")
+            .map(nome => nome.charAt(0).toUpperCase() + nome.slice(1))
+            .join(" ");
 
-document.getElementById("usuario").innerHTML =
-    `Bem-vindo(a), <strong>${nomeFormatado}</strong>`;
+        document.getElementById("usuario").innerHTML =
+            `Bem-vindo(a), <strong>${nomeFormatado}</strong>`;
     }
 
     try {
@@ -32,5 +32,3 @@ document.getElementById("usuario").innerHTML =
         console.error("Erro ao carregar dashboard:", erro);
     }
 }
-
-carregarDashboard();
