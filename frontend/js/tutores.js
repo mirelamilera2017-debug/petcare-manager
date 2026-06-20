@@ -19,7 +19,7 @@ function exibirTutores(lista) {
         tabela.innerHTML += `
             <tr>
                 <td>${tutor.nome}</td>
-                <td>${tutor.telefone || tutor.contato || ""}</td>
+                <td>${tutor.telefone || ""}</td>
                 <td>${tutor.endereco || ""}</td>
                 <td>
                     <button class="btn-editar" onclick="editarTutor(${tutor.id})">Editar</button>
@@ -49,12 +49,14 @@ async function salvarTutor() {
                 method: "PUT",
                 body: JSON.stringify(tutor)
             });
+
             alert("Tutor atualizado com sucesso!");
         } else {
             await apiFetch("/tutores", {
                 method: "POST",
                 body: JSON.stringify(tutor)
             });
+
             alert("Tutor cadastrado com sucesso!");
         }
 
@@ -69,12 +71,10 @@ async function salvarTutor() {
 function editarTutor(id) {
     const tutor = tutores.find(t => t.id == id);
 
-    if (!tutor) return;
-
     document.getElementById("idTutor").value = tutor.id;
     document.getElementById("nome").value = tutor.nome;
-    document.getElementById("telefone").value = tutor.telefone || tutor.contato || "";
-    document.getElementById("endereco").value = tutor.endereco || "";
+    document.getElementById("telefone").value = tutor.telefone;
+    document.getElementById("endereco").value = tutor.endereco;
 }
 
 async function excluirTutor(id) {
@@ -98,8 +98,8 @@ function filtrarTutores() {
 
     const filtrados = tutores.filter(tutor =>
         tutor.nome.toLowerCase().includes(termo) ||
-        String(tutor.telefone || "").toLowerCase().includes(termo) ||
-        String(tutor.endereco || "").toLowerCase().includes(termo)
+        tutor.telefone.toLowerCase().includes(termo) ||
+        tutor.endereco.toLowerCase().includes(termo)
     );
 
     exibirTutores(filtrados);
