@@ -1,113 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <title>Dashboard | PetCare Manager</title>
-
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body onload="carregarDashboard()">
 
-<div class="app">
+<div class="sidebar">
+    <div class="logo">🐾 PetCare</div>
 
-    <aside class="sidebar">
+    <div class="perfil">
+        <div class="avatar">AD</div>
+        <strong>Administrador</strong>
+        <span>PetCare Manager</span>
+    </div>
 
-        <h2>🐾 PetCare</h2>
-
-        <div class="usuario-logado">
-            <img src="https://ui-avatars.com/api/?name=Administrador&background=2f5be7&color=fff" alt="">
-            <h4>Administrador</h4>
-            <small>PetCare Manager</small>
-        </div>
-
-        <a class="active" href="dashboard.html">🏠 Dashboard</a>
-        <a href="tutores.html">👤 Tutores</a>
-        <a href="pets.html">🐶 Pets</a>
-        <a href="produtos.html">🦴 Produtos</a>
-        <a href="servicos.html">✂ Serviços</a>
-        <a href="agendamentos.html">📅 Agendamentos</a>
-        <a href="#" onclick="logout()">🚪 Sair</a>
-
-    </aside>
-
-    <main class="content">
-
-        <h1>Dashboard</h1>
-
-        <p id="usuario"></p>
-
-        <div class="cards">
-
-            <div class="card-dashboard">
-                <h3>👤 Tutores</h3>
-                <h1 id="qtTutores">0</h1>
-            </div>
-
-            <div class="card-dashboard">
-                <h3>🐶 Pets</h3>
-                <h1 id="qtPets">0</h1>
-            </div>
-
-            <div class="card-dashboard">
-                <h3>🦴 Produtos</h3>
-                <h1 id="qtProdutos">0</h1>
-            </div>
-
-            <div class="card-dashboard">
-                <h3>✂ Serviços</h3>
-                <h1 id="qtServicos">0</h1>
-            </div>
-
-            <div class="card-dashboard">
-                <h3>📅 Agendamentos</h3>
-                <h1 id="qtAgendamentos">0</h1>
-            </div>
-
-        </div>
-
-        <div class="card grande">
-
-            <h2>Bem-vinda ao PetCare Manager 🐾</h2>
-
-            <p>
-                Sistema Full Stack desenvolvido para gerenciamento de PetShop.
-            </p>
-
-            <br>
-
-            <p>
-
-                ✔ Login com JWT
-
-                <br><br>
-
-                ✔ CRUD Completo
-
-                <br><br>
-
-                ✔ Swagger
-
-                <br><br>
-
-                ✔ API REST
-
-                <br><br>
-
-                ✔ Dashboard Administrativo
-
-            </p>
-
-        </div>
-
-    </main>
-
+    <a class="active" href="dashboard.html">🏠 Dashboard</a>
+    <a href="tutores.html">👤 Tutores</a>
+    <a href="pets.html">🐶 Pets</a>
+    <a href="produtos.html">🦴 Produtos</a>
+    <a href="servicos.html">✂ Serviços</a>
+    <a href="agendamentos.html">📅 Agendamentos</a>
+    <a onclick="logout()">🚪 Sair</a>
 </div>
+
+<main class="conteudo">
+    <section class="topo-dashboard">
+        <div>
+            <h1>Dashboard</h1>
+            <p id="usuario">Bem-vindo(a)</p>
+        </div>
+        <div class="badge-sistema">Sistema Online</div>
+    </section>
+
+    <section class="cards">
+        <div class="card">
+            <span>👤</span>
+            <h3>Tutores</h3>
+            <strong id="qtTutores">0</strong>
+        </div>
+
+        <div class="card">
+            <span>🐶</span>
+            <h3>Pets</h3>
+            <strong id="qtPets">0</strong>
+        </div>
+
+        <div class="card">
+            <span>🦴</span>
+            <h3>Produtos</h3>
+            <strong id="qtProdutos">0</strong>
+        </div>
+
+        <div class="card">
+            <span>✂</span>
+            <h3>Serviços</h3>
+            <strong id="qtServicos">0</strong>
+        </div>
+
+        <div class="card">
+            <span>📅</span>
+            <h3>Agendamentos</h3>
+            <strong id="qtAgendamentos">0</strong>
+        </div>
+    </section>
+
+    <section class="boas-vindas">
+        <h2>Bem-vinda ao PetCare Manager 🐾</h2>
+        <p>Sistema Full Stack desenvolvido para gerenciamento administrativo de PetShop.</p>
+
+        <div class="lista">
+            <p>✔ Login com JWT</p>
+            <p>✔ CRUD Completo</p>
+            <p>✔ Swagger</p>
+            <p>✔ API REST</p>
+            <p>✔ Dashboard Administrativo</p>
+        </div>
+    </section>
+</main>
 
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
-
 </body>
-
 </html>
