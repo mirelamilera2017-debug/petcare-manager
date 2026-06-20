@@ -1,4 +1,5 @@
-const API = "https://ominous-tribble-gx4jxqj96jxphpv4-3000.app.github.dev";
+const API = "https://petcare-manager.onrender.com";
+
 function getToken() {
     return localStorage.getItem("token");
 }
@@ -15,7 +16,7 @@ function logout() {
 }
 
 async function apiFetch(endpoint, options = {}) {
-    const resposta = await fetch(API + endpoint, {
+    const resposta = await fetch(`${API}${endpoint}`, {
         ...options,
         headers: {
             "Content-Type": "application/json",

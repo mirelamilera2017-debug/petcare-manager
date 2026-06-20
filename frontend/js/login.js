@@ -1,4 +1,4 @@
-const API = "https://ominous-tribble-gx4jxqj96jxphpv4-3000.app.github.dev";
+const API = "https://petcare-manager.onrender.com";
 
 // Login do usuário - [Mirela Santos]
 async function loginUsuario() {
@@ -27,14 +27,14 @@ async function loginUsuario() {
         }
 
         localStorage.setItem("token", dados.token);
-        localStorage.setItem("usuario", email);
+        localStorage.setItem("usuario", JSON.stringify(dados.usuario));
 
         alert("Login realizado com sucesso!");
         window.location.href = "dashboard.html";
 
     } catch (erro) {
-        console.error("Erro completo no login:", erro);
-        alert("Erro ao conectar com a API. Veja o Console com F12.");
+        console.error("Erro no login:", erro);
+        alert("Erro ao conectar com a API.");
     }
 }
 
@@ -58,16 +58,7 @@ async function cadastrarUsuario() {
             body: JSON.stringify({ nome, email, senha })
         });
 
-        const texto = await resposta.text();
-
-        let dados;
-        try {
-            dados = JSON.parse(texto);
-        } catch {
-            console.error("Resposta não veio em JSON:", texto);
-            alert("Erro: a API não retornou JSON. Veja o Console com F12.");
-            return;
-        }
+        const dados = await resposta.json();
 
         if (!resposta.ok) {
             alert(dados.mensagem || "Erro ao cadastrar usuário.");
@@ -77,7 +68,7 @@ async function cadastrarUsuario() {
         alert(dados.mensagem || "Usuário cadastrado com sucesso!");
 
     } catch (erro) {
-        console.error("Erro completo no cadastro:", erro);
-        alert("Erro ao cadastrar usuário. Veja o Console com F12.");
+        console.error("Erro no cadastro:", erro);
+        alert("Erro ao conectar com a API.");
     }
 }

@@ -13,7 +13,7 @@ const swaggerDocument = require("./swagger");
 
 const app = express();
 
-// CORS liberado para o frontend local e Codespaces - [Mirela Santos]
+// Configuração CORS - [Mirela Santos]
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -38,11 +38,11 @@ app.use("/produtos", produtoRoutes);
 app.use("/servicos", servicoRoutes);
 app.use("/agendamentos", agendamentoRoutes);
 
-// Documentação Swagger - [Mirela Santos]
+// Swagger - [Mirela Santos]
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor iniciado em http://localhost:${PORT}`);
+    console.log(`Servidor iniciado em http://0.0.0.0:${PORT}`);
 });
