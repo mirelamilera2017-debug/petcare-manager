@@ -1,5 +1,4 @@
-const API = "http://localhost:3000";
-
+const API = "https://ominous-tribble-gx4jxqj96jxphpv4-3000.app.github.dev";
 function getToken() {
     return localStorage.getItem("token");
 }
